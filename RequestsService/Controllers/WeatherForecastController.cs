@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace RequestsService.Controllers
 {
+    /// <summary>
+    /// Weather controller
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
