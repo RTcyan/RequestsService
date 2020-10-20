@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace RequestsService.Domain.Model
+{
+    /// <summary>
+    /// Заявки
+    /// </summary>
+    public class Request
+    {
+        /// Пользователь, который оставил заявку 
+        public User User { get; set; }
+
+        /// <summary>
+        /// Тип завяки
+        /// </summary>
+        public RequestsType Type { get; set; }
+
+        /// <summary>
+        /// Все данные по заявке в виде JSON
+        /// </summary>
+        public string Data { get; set; }
+
+        /// <summary>
+        /// Оператор, которые обрабатывает заявку
+        /// </summary>
+        public Operator Operator { get; set; }
+
+        /// <summary>
+        /// Результат по заявке
+        /// </summary>
+        public string Result { get; set; }
+
+        /// <summary>
+        /// Дата создания заявки
+        /// </summary>
+        public DateTime CreationDate { get; set; }
+
+        /// <summary>
+        /// Дата начала обработки заявки
+        /// </summary>
+        public DateTime ProcessingStartDate { get; set; }
+
+        /// <summary>
+        /// Дата конца обработки заявки
+        /// </summary>
+        public DateTime ProcessingEndDate { get; set; }
+
+        /// <summary>
+        /// Комментарий пользователя
+        /// </summary>
+        public string UserComment { get; set; }
+
+        /// <summary>
+        /// Комментарий оператора
+        /// </summary>
+        public string OperatorComment { get; set; }
+    }
+}
