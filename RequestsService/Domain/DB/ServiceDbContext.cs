@@ -1,0 +1,197 @@
+﻿using RequestsService.Domain.Model;
+using RequestsService.Domain.Model.Common;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+
+namespace RequestsService.Domain.DB
+{
+    public class ServiceDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    {
+        public ServiceDbContext(DbContextOptions<ServiceDbContext> options)
+            : base(options)
+        {
+            Database.Migrate();
+        }
+
+        /// <summary>
+        /// Пользователи
+        /// </summary>
+        public override DbSet<User> Users { get; set; }
+
+        /// <summary>
+        /// Заявки
+        /// </summary>
+        public DbSet<Request> Requests { get; private set; }
+
+        /// <inheritdoc/>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            #region User
+
+            modelBuilder.Entity<User>(x =>
+            {
+                x.HasOne(y => y.Employee)
+                .WithOne()
+                .HasForeignKey<User>("EmployeeId")
+                .IsRequired(true);
+                x.HasIndex("EmployeeId").IsUnique(true);
+            });
+
+            #endregion
+
+            #region Faculty
+
+            modelBuilder.Entity<Faculty>(x =>
+            {
+                x.ToTable("Faculties");
+                EntityId(x);
+                x.Property(y => y.Name)
+                    .HasColumnName("Name")
+                    .IsRequired();
+            });
+
+            #endregion
+
+            #region Student
+
+            modelBuilder.Entity<Student>(b =>
+            {
+                b.ToTable("Students");
+                EntityId(b);
+                b.Property(x => x.FirstName)
+                    .HasColumnName("FirstName")
+                    .IsRequired();
+                b.Property(x => x.Surname)
+                    .HasColumnName("Surname")
+                    .IsRequired();
+                b.HasOne(x => x.Faculty)
+                    .WithMany()
+                    .IsRequired();
+                b.Property(x => x.Grade)
+                    .HasColumnName("Grade")
+                    .IsRequired();
+                b.Property(x => x.StartEducation)
+                    .HasColumnName("StartEducation")
+                    .IsRequired();
+                b.Property(x => x.NumberStudentCard)
+                    .HasColumnName("NumberStudentCard")
+                    .IsRequired();
+                b.Property(x => x.PhotoStudentCardId)
+                    .HasColumnName("PhotoStudentCardId")
+                    .IsRequired();
+                b.Ignore(x => x.FullName);
+            });
+
+            #endregion
+
+            #region Department
+
+            modelBuilder.Entity<Department>(x =>
+            {
+                x.ToTable("Departments");
+                EntityId(x);
+                x.Property(y => y.Name)
+                    .HasColumnName("Name")
+                    .IsRequired();
+            });
+
+            #endregion
+
+            #region Operator
+
+            modelBuilder.Entity<Operator>(b =>
+            {
+                b.ToTable("Operators");
+                EntityId(b);
+                b.Property(x => x.FirstName)
+                    .HasColumnName("FirstName")
+                    .IsRequired();
+                b.Property(x => x.Surname)
+                    .HasColumnName("Surname")
+                    .IsRequired();
+                b.HasOne(x => x.Department)
+                    .WithMany()
+                    .IsRequired();
+                b.Ignore(x => x.FullName);
+            });
+
+            #endregion
+
+            #region RequestType
+
+            modelBuilder.Entity<RequestsType>(x =>
+            {
+                x.ToTable("RequestsTypes");
+                EntityId(x);
+                x.Property(y => y.Name)
+                    .HasColumnName("Name")
+                    .IsRequired();
+                x.Property(y => y.Fields)
+                    .HasColumnName("Fields)")
+                    .IsRequired();
+                x.HasOne(x => x.Department)
+                    .WithOne()
+                    .IsRequired();
+            });
+
+            #endregion
+
+            #region Request
+
+            modelBuilder.Entity<Request>(x =>
+            {
+                x.ToTable("Requests");
+                EntityId(x);
+                x.HasOne(y => y.Type)
+                    .WithMany()
+                    .IsRequired();
+                x.Property(y => y.Data)
+                    .HasColumnName("Data")
+                    .IsRequired();
+                x.Property(y => y.Result)
+                    .HasColumnName("Result");
+                x.Property(y => y.CreationDate)
+                    .HasColumnName("CreationDate")
+                    .IsRequired();
+                x.Property(y => y.ProcessingStartDate)
+                    .HasColumnName("ProcessingStartDate");
+                x.Property(y => y.ProcessingEndDate)
+                    .HasColumnName("ProcessingEndDate");
+                x.HasOne(y => y.Operator)
+                    .WithMany();
+                x.Property(y => y.UserComment)
+                    .HasColumnName("UserComment");
+                x.Property(y => y.OperatorComment)
+                    .HasColumnName("OperatorComment");
+            });
+
+            #endregion
+
+        }
+
+        /// <summary>
+        /// Описание идентификатора сущности модели
+        /// </summary>
+        /// <typeparam name="TEntity">Тип сущности</typeparam>
+        /// <param name="builder">Построитель модели данных</param>
+        private static void EntityId<TEntity>(EntityTypeBuilder<TEntity> builder)
+                where TEntity : Entity
+        {
+            builder.Property(x => x.Id)
+                .HasColumnName("Id")
+                .IsRequired();
+            builder.HasKey(x => x.Id)
+                .HasAnnotation("Npgsql:Serial", true);
+        }
+    }
+
+}
