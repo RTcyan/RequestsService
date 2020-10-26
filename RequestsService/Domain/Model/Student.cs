@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RequestsService.Domain.Model.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,8 +9,12 @@ namespace RequestsService.Domain.Model
     /// <summary>
     /// Студент
     /// </summary>
-    public class Student : Employee
+    public class Student: Entity
     {
+        /// <summary>
+        /// Пользователь
+        /// </summary>
+        public Employee Employee { get; set; }
         /// <summary>
         /// Начала обучения
         /// </summary>

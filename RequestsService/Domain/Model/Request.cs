@@ -32,12 +32,12 @@ namespace RequestsService.Domain.Model
         /// <summary>
         /// Результат по заявке
         /// </summary>
-        public string Result { get; set; }
+        public string ResultFileId { get; set; }
 
         /// <summary>
         /// Дата создания заявки
         /// </summary>
-        public DateTime CreationDate { get; set; }
+        public DateTime Created { get; set; }
 
         /// <summary>
         /// Дата начала обработки заявки
@@ -58,5 +58,19 @@ namespace RequestsService.Domain.Model
         /// Комментарий оператора
         /// </summary>
         public string OperatorComment { get; set; }
+
+        /// <summary>
+        /// Статус заявки
+        /// </summary>
+        public RequestStatus RequestStatus { get; private set; }
+
+        /// <summary>
+        /// Изменение статуса
+        /// </summary>
+        /// <param name="newStatus">Новый статус</param>
+        public void ChangeStatus(RequestStatus newStatus)
+        {
+            this.RequestStatus = newStatus;
+        }
     }
 }

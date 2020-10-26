@@ -9,8 +9,13 @@ namespace RequestsService.Domain.Model
     /// <summary>
     /// Оператор (сотрудник)
     /// </summary>
-    public class Operator: Employee
+    public class Operator: Entity
     {
+        /// <summary>
+        /// Пользователь
+        /// </summary>
+        public Employee Employee { get; set; }
+
         /// <summary>
         /// Отделения оператора
         /// </summary>

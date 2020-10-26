@@ -30,6 +30,36 @@ namespace RequestsService.Domain.DB
         /// </summary>
         public DbSet<Request> Requests { get; private set; }
 
+        /// <summary>
+        /// Отделы
+        /// </summary>
+        public DbSet<Department> Departments { get; private set; }
+
+        /// <summary>
+        /// Факультеты
+        /// </summary>
+        public DbSet<Faculty> Faculties { get; private set; }
+
+        /// <summary>
+        /// Операторы
+        /// </summary>
+        public DbSet<Operator> Operators { get; private set; }
+
+        /// <summary>
+        /// Типы заявок
+        /// </summary>
+        public DbSet<RequestsType> RequestsTypes { get; private set; }
+
+        /// <summary>
+        /// Студенты
+        /// </summary>
+        public DbSet<Student> Students { get; private set; }
+
+        /// <summary>
+        /// Пользователь
+        /// </summary>
+        public DbSet<Employee> Employees { get; private set; }
+
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +74,21 @@ namespace RequestsService.Domain.DB
                 .HasForeignKey<User>("EmployeeId")
                 .IsRequired(true);
                 x.HasIndex("EmployeeId").IsUnique(true);
+            });
+
+            #endregion
+
+            #region Employee
+
+            modelBuilder.Entity<Employee>(x =>
+            {
+                x.Property(y => y.FirstName)
+                    .HasColumnName("FirstName")
+                    .IsRequired();
+                x.Property(y => y.Surname)
+                    .HasColumnName("Surname")
+                    .IsRequired();
+                x.Ignore(y => y.FullName);
             });
 
             #endregion
@@ -67,11 +112,8 @@ namespace RequestsService.Domain.DB
             {
                 b.ToTable("Students");
                 EntityId(b);
-                b.Property(x => x.FirstName)
-                    .HasColumnName("FirstName")
-                    .IsRequired();
-                b.Property(x => x.Surname)
-                    .HasColumnName("Surname")
+                b.HasOne(x => x.Employee)
+                    .WithOne()
                     .IsRequired();
                 b.HasOne(x => x.Faculty)
                     .WithMany()
@@ -88,7 +130,6 @@ namespace RequestsService.Domain.DB
                 b.Property(x => x.PhotoStudentCardId)
                     .HasColumnName("PhotoStudentCardId")
                     .IsRequired();
-                b.Ignore(x => x.FullName);
             });
 
             #endregion
@@ -112,16 +153,12 @@ namespace RequestsService.Domain.DB
             {
                 b.ToTable("Operators");
                 EntityId(b);
-                b.Property(x => x.FirstName)
-                    .HasColumnName("FirstName")
-                    .IsRequired();
-                b.Property(x => x.Surname)
-                    .HasColumnName("Surname")
-                    .IsRequired();
+                b.HasOne(x => x.Employee)
+                  .WithOne()
+                  .IsRequired();
                 b.HasOne(x => x.Department)
                     .WithMany()
                     .IsRequired();
-                b.Ignore(x => x.FullName);
             });
 
             #endregion
@@ -157,9 +194,9 @@ namespace RequestsService.Domain.DB
                 x.Property(y => y.Data)
                     .HasColumnName("Data")
                     .IsRequired();
-                x.Property(y => y.Result)
+                x.Property(y => y.ResultFileId)
                     .HasColumnName("Result");
-                x.Property(y => y.CreationDate)
+                x.Property(y => y.Created)
                     .HasColumnName("CreationDate")
                     .IsRequired();
                 x.Property(y => y.ProcessingStartDate)
@@ -172,6 +209,9 @@ namespace RequestsService.Domain.DB
                     .HasColumnName("UserComment");
                 x.Property(y => y.OperatorComment)
                     .HasColumnName("OperatorComment");
+                x.Property(y => y.RequestStatus)
+                    .HasColumnName("RequestStatus")
+                    .IsRequired();
             });
 
             #endregion
