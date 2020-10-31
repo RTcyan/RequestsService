@@ -70,9 +70,9 @@ namespace RequestsService.Domain.DB
             modelBuilder.Entity<User>(x =>
             {
                 x.HasOne(y => y.Employee)
-                .WithOne()
-                .HasForeignKey<User>("EmployeeId")
-                .IsRequired(true);
+                    .WithOne()
+                    .HasForeignKey<User>("EmployeeId")
+                    .IsRequired(true);
                 x.HasIndex("EmployeeId").IsUnique(true);
             });
 
@@ -114,6 +114,7 @@ namespace RequestsService.Domain.DB
                 EntityId(b);
                 b.HasOne(x => x.Employee)
                     .WithOne()
+                    .HasForeignKey<Student>("EmployeeId")
                     .IsRequired();
                 b.HasOne(x => x.Faculty)
                     .WithMany()
@@ -154,8 +155,9 @@ namespace RequestsService.Domain.DB
                 b.ToTable("Operators");
                 EntityId(b);
                 b.HasOne(x => x.Employee)
-                  .WithOne()
-                  .IsRequired();
+                    .WithOne()
+                    .HasForeignKey<Operator>("EmployeeId")
+                    .IsRequired();
                 b.HasOne(x => x.Department)
                     .WithMany()
                     .IsRequired();
@@ -177,6 +179,7 @@ namespace RequestsService.Domain.DB
                     .IsRequired();
                 x.HasOne(x => x.Department)
                     .WithOne()
+                    .HasForeignKey<RequestsType>("DepartmentId")
                     .IsRequired();
             });
 
