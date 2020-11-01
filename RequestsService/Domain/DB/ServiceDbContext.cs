@@ -69,6 +69,9 @@ namespace RequestsService.Domain.DB
 
             modelBuilder.Entity<User>(x =>
             {
+                x.Property(y => y.UserRole)
+                    .HasColumnName("UserRole")
+                    .IsRequired();
                 x.HasOne(y => y.Employee)
                     .WithOne()
                     .HasForeignKey<User>("EmployeeId")

@@ -58,6 +58,6 @@ namespace RequestsService.DTO.User
         /// <summary>
         /// Факультет
         /// </summary>
-        public int FacultyID { get; set; }
+        public long FacultyID { get; set; }
     }
 }
