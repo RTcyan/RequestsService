@@ -4,11 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 
 namespace RequestsService.Domain.DB
 {
@@ -69,9 +64,6 @@ namespace RequestsService.Domain.DB
 
             modelBuilder.Entity<User>(x =>
             {
-                x.Property(y => y.UserRole)
-                    .HasColumnName("UserRole")
-                    .IsRequired();
                 x.HasOne(y => y.Employee)
                     .WithOne()
                     .HasForeignKey<User>("EmployeeId")
@@ -91,6 +83,12 @@ namespace RequestsService.Domain.DB
                 x.Property(y => y.Surname)
                     .HasColumnName("Surname")
                     .IsRequired();
+                x.HasOne(y => y.Student)
+                    .WithOne(x => x.Employee)
+                    .HasForeignKey<Student>("EmployeeId");
+                x.HasOne(y => y.Operator)
+                    .WithOne(x => x.Employee)
+                    .HasForeignKey<Operator>("EmployeeId");
                 x.Ignore(y => y.FullName);
             });
 
@@ -115,10 +113,6 @@ namespace RequestsService.Domain.DB
             {
                 b.ToTable("Students");
                 EntityId(b);
-                b.HasOne(x => x.Employee)
-                    .WithOne()
-                    .HasForeignKey<Student>("EmployeeId")
-                    .IsRequired();
                 b.HasOne(x => x.Faculty)
                     .WithMany()
                     .IsRequired();
@@ -157,10 +151,6 @@ namespace RequestsService.Domain.DB
             {
                 b.ToTable("Operators");
                 EntityId(b);
-                b.HasOne(x => x.Employee)
-                    .WithOne()
-                    .HasForeignKey<Operator>("EmployeeId")
-                    .IsRequired();
                 b.HasOne(x => x.Department)
                     .WithMany()
                     .IsRequired();

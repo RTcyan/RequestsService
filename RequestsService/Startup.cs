@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RequestsService.Domain.DB;
 using RequestsService.Domain.Model;
+using RequestsService.Infrastructure.Guarantors;
 
 namespace RequestsService
 {
@@ -59,7 +60,7 @@ namespace RequestsService
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddDbContext<ServiceDbContext>(options =>
-                options.UseNpgsql("Username=postgres;Database=requestsService;Password=postgres;Host=localhost"));
+                options.UseNpgsql("Username=postgres;Database=requestsService;Password=111111;Host=localhost"));
 
             services.AddIdentity<User, IdentityRole<int>>(options =>
             {
@@ -68,6 +69,10 @@ namespace RequestsService
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireDigit = false;
             }).AddEntityFrameworkStores<ServiceDbContext>();
+
+            var serviceProvider = services.BuildServiceProvider();
+            var guarantor = new SeedDataGuarantor(serviceProvider);
+            guarantor.EnsureAsync();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

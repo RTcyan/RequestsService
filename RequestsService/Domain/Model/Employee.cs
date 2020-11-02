@@ -28,5 +28,15 @@ namespace RequestsService.Domain.Model
         {
             get => FirstName + " " + Surname;
         }
+
+        /// <summary>
+        /// Студент
+        /// </summary>
+        public Student Student { get; set; }
+
+        /// <summary>
+        /// Оператор
+        /// </summary>
+        public Operator Operator { get; set; }
     }
 }

@@ -15,6 +15,7 @@ namespace RequestsService.Domain.Model
         /// Пользователь
         /// </summary>
         public Employee Employee { get; set; }
+
         /// <summary>
         /// Начала обучения
         /// </summary>

@@ -144,7 +144,7 @@ namespace RequestsService.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EmployeeId = table.Column<long>(nullable: false),
+                    EmployeeId = table.Column<long>(nullable: true),
                     DepartmentId = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
@@ -161,7 +161,7 @@ namespace RequestsService.Migrations
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -170,7 +170,7 @@ namespace RequestsService.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EmployeeId = table.Column<long>(nullable: false),
+                    EmployeeId = table.Column<long>(nullable: true),
                     StartEducation = table.Column<DateTime>(nullable: false),
                     NumberStudentCard = table.Column<string>(nullable: false),
                     PhotoStudentCardId = table.Column<string>(nullable: false),
@@ -185,7 +185,7 @@ namespace RequestsService.Migrations
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Students_Faculties_FacultyId",
                         column: x => x.FacultyId,

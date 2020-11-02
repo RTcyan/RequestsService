@@ -12,11 +12,6 @@ namespace RequestsService.Domain.Model
     public class User : IdentityUser<int>
     {
         /// <summary>
-        /// Роль пользователя
-        /// </summary>
-        public UserRole UserRole { get; set; }
-
-        /// <summary>
         /// Профиль пользователя
         /// </summary>
         public Employee Employee { get; set; }

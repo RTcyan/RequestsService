@@ -10,7 +10,7 @@ using RequestsService.Domain.DB;
 namespace RequestsService.Migrations
 {
     [DbContext(typeof(ServiceDbContext))]
-    [Migration("20201031100142_init")]
+    [Migration("20201102143825_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -222,7 +222,6 @@ namespace RequestsService.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long?>("EmployeeId")
-                        .IsRequired()
                         .HasColumnType("bigint");
 
                     b.HasKey("Id")
@@ -338,7 +337,6 @@ namespace RequestsService.Migrations
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long?>("EmployeeId")
-                        .IsRequired()
                         .HasColumnType("bigint");
 
                     b.Property<long>("FacultyId")
@@ -505,10 +503,8 @@ namespace RequestsService.Migrations
                         .IsRequired();
 
                     b.HasOne("RequestsService.Domain.Model.Employee", "Employee")
-                        .WithOne()
-                        .HasForeignKey("RequestsService.Domain.Model.Operator", "EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithOne("Operator")
+                        .HasForeignKey("RequestsService.Domain.Model.Operator", "EmployeeId");
                 });
 
             modelBuilder.Entity("RequestsService.Domain.Model.Request", b =>
@@ -540,10 +536,8 @@ namespace RequestsService.Migrations
             modelBuilder.Entity("RequestsService.Domain.Model.Student", b =>
                 {
                     b.HasOne("RequestsService.Domain.Model.Employee", "Employee")
-                        .WithOne()
-                        .HasForeignKey("RequestsService.Domain.Model.Student", "EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithOne("Student")
+                        .HasForeignKey("RequestsService.Domain.Model.Student", "EmployeeId");
 
                     b.HasOne("RequestsService.Domain.Model.Faculty", "Faculty")
                         .WithMany()
