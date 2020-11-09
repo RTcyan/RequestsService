@@ -32,6 +32,19 @@ namespace RequestsService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddDbContext<ServiceDbContext>(options =>
+                options.UseNpgsql("Username=postgres;Database=requestsService;Password=111111;Host=localhost"));
+
+            services.AddIdentity<User, IdentityRole<int>>(options =>
+            {
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = false;
+            }).AddEntityFrameworkStores<ServiceDbContext>()
+            .AddDefaultTokenProviders();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
@@ -51,28 +64,18 @@ namespace RequestsService
                             ValidateLifetime = true,
 
                             // установка ключа безопасности
-                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                            // валидация ключа безопасности
-                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey()
                         };
                     });
 
-            services.AddControllers().AddNewtonsoftJson();
 
-            services.AddDbContext<ServiceDbContext>(options =>
-                options.UseNpgsql("Username=postgres;Database=requestsService;Password=111111;Host=localhost"));
 
-            services.AddIdentity<User, IdentityRole<int>>(options =>
-            {
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireDigit = false;
-            }).AddEntityFrameworkStores<ServiceDbContext>();
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson();
 
-            var serviceProvider = services.BuildServiceProvider();
-            var guarantor = new SeedDataGuarantor(serviceProvider);
-            guarantor.EnsureAsync();
+            //var serviceProvider = services.BuildServiceProvider();
+            //var guarantor = new SeedDataGuarantor(serviceProvider);
+            //guarantor.EnsureAsync();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,6 +90,7 @@ namespace RequestsService
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

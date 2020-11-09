@@ -4,9 +4,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RequestsService.Domain.DB;
@@ -45,11 +45,14 @@ namespace RequestsService.Controllers
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
-        [HttpGet("usr")]
+        [Authorize]
+        [HttpGet]
         public IActionResult GetUsers()
         {
+            var body = HttpContext.Request.Headers;
+
             var users = _serviceDbContext.Users.ToList();
-        
+
             return Ok(users);
         }
 
@@ -80,18 +83,23 @@ namespace RequestsService.Controllers
                     new Claim(ClaimTypes.Role, rolesString)
                 };
 
-            var now = DateTime.UtcNow;
-            // создаем JWT-токен
-            var jwt = new JwtSecurityToken(
-                    issuer: AuthOptions.ISSUER,
-                    audience: AuthOptions.AUDIENCE,
-                    notBefore: now,
-                    claims: claims,
-                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = AuthOptions.ISSUER,
+                Audience = AuthOptions.AUDIENCE,
+                NotBefore = DateTime.UtcNow,
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                SigningCredentials = new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
+            };
 
-            return Ok(encodedJwt);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+
+            return Ok(tokenHandler.WriteToken(token));
+
         }
 
         private IActionResult Json(object response)
@@ -160,7 +168,7 @@ namespace RequestsService.Controllers
 
             await _userManager.AddToRoleAsync(user, SecurityConstants.StudentRole);
 
-            
+
 
             _serviceDbContext.SaveChanges();
 
