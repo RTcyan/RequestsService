@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace RequestsService.Domain.Model
@@ -14,6 +16,8 @@ namespace RequestsService.Domain.Model
         /// <summary>
         /// Пользователь
         /// </summary>
+        [JsonIgnore]
+        [IgnoreDataMember]
         public Employee Employee { get; set; }
 
         /// <summary>

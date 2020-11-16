@@ -42,8 +42,7 @@ namespace RequestsService
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireDigit = false;
-            }).AddEntityFrameworkStores<ServiceDbContext>()
-            .AddDefaultTokenProviders();
+            }).AddEntityFrameworkStores<ServiceDbContext>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
@@ -73,9 +72,9 @@ namespace RequestsService
             services.AddControllersWithViews()
                 .AddNewtonsoftJson();
 
-            //var serviceProvider = services.BuildServiceProvider();
-            //var guarantor = new SeedDataGuarantor(serviceProvider);
-            //guarantor.EnsureAsync();
+            var serviceProvider = services.BuildServiceProvider();
+            var guarantor = new SeedDataGuarantor(serviceProvider);
+            guarantor.EnsureAsync();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using RequestsService.Domain.DB;
 using RequestsService.Domain.Model;
 using RequestsService.DTO.User;
+using RequestsService.Extensions;
 using RequestsService.Security;
 
 namespace RequestsService.Controllers
@@ -25,7 +27,6 @@ namespace RequestsService.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly ServiceDbContext _serviceDbContext;
-        private readonly SignInManager<User> _signInManager;
 
         private readonly ILogger<UserController> _logger;
 
@@ -36,24 +37,19 @@ namespace RequestsService.Controllers
         /// <param name="serviceDbContext">serviceDbContext</param>
         public UserController(
             UserManager<User> userManager,
-            ServiceDbContext serviceDbContext,
-            SignInManager<User> signInManager
+            ServiceDbContext serviceDbContext
             )
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _serviceDbContext = serviceDbContext ?? throw new ArgumentNullException(nameof(serviceDbContext));
-            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
-        [Authorize]
-        [HttpGet]
-        public IActionResult GetUsers()
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("current")]
+        public IActionResult getCurrentUser()
         {
-            var body = HttpContext.Request.Headers;
 
-            var users = _serviceDbContext.Users.ToList();
-
-            return Ok(users);
+            return Ok(this.GetCurrentUser(_serviceDbContext));
         }
 
 
@@ -67,11 +63,15 @@ namespace RequestsService.Controllers
         public async Task<IActionResult> SignInAsync(SignInUserDTO model)
         {
 
-            var user = await GetUserAsync(model);
+            var user = await _userManager.FindByNameAsync(model.Login);
+
             if (user == null)
-            {
-                return BadRequest(new { errorText = "Invalid username or password." });
-            }
+                return NotFound();
+
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, model.Password);
+
+            if (!isPasswordCorrect)
+                return Unauthorized();
 
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -80,7 +80,8 @@ namespace RequestsService.Controllers
             var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Role, rolesString)
+                    new Claim(ClaimTypes.Role, rolesString),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -105,27 +106,6 @@ namespace RequestsService.Controllers
         private IActionResult Json(object response)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Получение пользователя из БД
-        /// </summary>
-        /// <param name="username">Логин</param>
-        /// <param name="password">Пароль</param>
-        /// <returns></returns>
-        private async Task<User> GetUserAsync(SignInUserDTO model)
-        {
-            User user = await _userManager.FindByNameAsync(model.UserName);
-            if (user == null)
-            {
-                return null;
-            }
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
-            if (result.Succeeded)
-            {
-                return user;
-            }
-            return null;
         }
 
         /// <summary>
