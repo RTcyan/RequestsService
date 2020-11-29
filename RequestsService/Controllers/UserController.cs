@@ -98,8 +98,9 @@ namespace RequestsService.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
+            Response.Headers.Add("Authorization", "Bearer " + tokenHandler.WriteToken(token));
 
-            return Ok(tokenHandler.WriteToken(token));
+            return Ok();
 
         }
 
