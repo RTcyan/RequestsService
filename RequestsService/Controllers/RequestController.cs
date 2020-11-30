@@ -42,7 +42,7 @@ namespace RequestsService.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewRequest(NewRequestDTO model)
         {
-            var currentUser = this.GetCurrentUser(_serviceDbContext);
+            var currentUser = await this.GetCurrentUser(_serviceDbContext);
 
             var request = new Request
             {

@@ -34,7 +34,7 @@ namespace RequestsService
         {
 
             services.AddDbContext<ServiceDbContext>(options =>
-                options.UseNpgsql("Username=postgres;Database=requestsService;Password=postgres;Host=localhost"));
+                options.UseNpgsql("Username=postgres;Database=requestsService;Password=111111;Host=localhost"));
 
             services.AddIdentity<User, IdentityRole<int>>(options =>
             {

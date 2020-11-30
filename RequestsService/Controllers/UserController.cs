@@ -46,10 +46,11 @@ namespace RequestsService.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("current")]
-        public IActionResult getCurrentUser()
+        public async Task<IActionResult> getCurrentUser()
         {
+            var currentUser = await this.GetCurrentUser(_serviceDbContext);
 
-            return Ok(this.GetCurrentUser(_serviceDbContext));
+            return Ok(currentUser);
         }
 
 
