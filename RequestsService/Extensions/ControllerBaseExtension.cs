@@ -4,6 +4,7 @@ using RequestsService.Domain.DB;
 using RequestsService.Domain.Model;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace RequestsService.Extensions
 {
@@ -16,11 +17,13 @@ namespace RequestsService.Extensions
             return long.Parse(userId);
         }
 
-        public static User GetCurrentUser(this ControllerBase controllerBase, ServiceDbContext serviceDbContext)
+        public static async Task<User> GetCurrentUser(this ControllerBase controllerBase, ServiceDbContext serviceDbContext)
         {
             var userId = controllerBase.GetCurrentUserId();
 
-            return serviceDbContext.Users.Include(x => x.Employee).FirstOrDefault<User>(user => user.Id == userId);
+            var user = await serviceDbContext.Users.Include(x => x.Employee).FirstOrDefaultAsync<User>(user => user.Id == userId);
+
+            return user;
         }
     }
 }
