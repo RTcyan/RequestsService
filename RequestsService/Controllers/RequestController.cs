@@ -39,8 +39,8 @@ namespace RequestsService.Controllers
             return Ok(requests);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddNewRequest(NewRequestDTO model)
+        [HttpPost("add")]
+        public async Task<IActionResult> AddNewRequestAsync(NewRequestDTO model)
         {
             var currentUser = await this.GetCurrentUser(_serviceDbContext);
 
@@ -59,6 +59,23 @@ namespace RequestsService.Controllers
             await _serviceDbContext.SaveChangesAsync();
 
             return Ok(request.Id);
+        }
+
+        [HttpGet("user/{id}")]
+        public IActionResult GetRequestsByUserId(long id)
+        {
+            var requests = this._serviceDbContext.Requests.Where(x => x.User.Id == id);
+            return Ok(requests);
+        }
+
+        [HttpGet("current")]
+        public IActionResult GetCurrentUserRequest()
+        {
+            var currentUserId = this.GetCurrentUserId();
+
+            var requests = this.GetRequestsByUserId(currentUserId);
+
+            return Ok(requests);
         }
     }
 }
