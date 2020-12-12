@@ -126,8 +126,7 @@ namespace RequestsService.Domain.DB
                     .HasColumnName("NumberStudentCard")
                     .IsRequired();
                 b.Property(x => x.PhotoStudentCardId)
-                    .HasColumnName("PhotoStudentCardId")
-                    .IsRequired();
+                    .HasColumnName("PhotoStudentCardId");
             });
 
             #endregion

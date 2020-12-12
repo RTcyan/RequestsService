@@ -11,7 +11,6 @@ namespace RequestsService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class FacultyController: ControllerBase
     {
         private readonly ServiceDbContext _serviceDbContext;
