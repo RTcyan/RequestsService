@@ -21,11 +21,6 @@ namespace RequestsService.DTO.Request
         public string Data { get; set; }
 
         /// <summary>
-        /// Дата создания заявки
-        /// </summary>
-        public DateTime Created { get; set; }
-
-        /// <summary>
         /// Комментарий пользователя
         /// </summary>
         public string UserComment { get; set; }

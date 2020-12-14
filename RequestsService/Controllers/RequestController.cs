@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RequestsService.Domain.DB;
 using RequestsService.Domain.Model;
 using RequestsService.DTO.Request;
@@ -26,17 +27,6 @@ namespace RequestsService.Controllers
         public RequestController(ServiceDbContext serviceDbContext)
         {
             _serviceDbContext = serviceDbContext ?? throw new ArgumentNullException(nameof(serviceDbContext));
-        }
-
-        /// <summary>
-        /// Возвращает все запросы текущего пользователя
-        /// </summary>
-        [HttpGet]
-        public IActionResult GetAllRequestsOfCurrentUser()
-        {
-            var currentUserId = this.GetCurrentUserId();
-            var requests = this._serviceDbContext.Requests.Select(x => x.User.Id == currentUserId);
-            return Ok(requests);
         }
 
         [HttpPost("add")]
@@ -69,11 +59,18 @@ namespace RequestsService.Controllers
         }
 
         [HttpGet("current")]
-        public IActionResult GetCurrentUserRequest()
+        public async Task<IActionResult> GetCurrentUserRequestAsync()
         {
             var currentUserId = this.GetCurrentUserId();
 
-            var requests = this.GetRequestsByUserId(currentUserId);
+            var currentUser = await this.GetCurrentUser(_serviceDbContext);
+
+            var student = _serviceDbContext.Students.FirstOrDefault(x => x.Employee.Id == currentUser.Employee.Id);
+
+            var requests = _serviceDbContext.Requests
+                .Include(x => x.Type)
+                .Include(x => x.Operator)
+                .Where(x => x.User.Id == currentUserId);
 
             return Ok(requests);
         }
