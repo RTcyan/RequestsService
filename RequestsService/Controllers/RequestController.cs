@@ -117,7 +117,7 @@ namespace RequestsService.Controllers
                 .Include(x => x.User)
                 .ThenInclude(x => x.Employee)
                 .ThenInclude(x => x.Student)
-                .Where(x => x.Type.Department.Id == id);
+                .Where(x => x.Type.Department.Id == id && x.RequestStatus != RequestStatus.Closed);
 
             List<RequestDTO> requestDTOs = new List<RequestDTO>();
 
@@ -198,8 +198,6 @@ namespace RequestsService.Controllers
                 return BadRequest();
             }
 
-
-
             if (request != null)
             {
                 request.ChangeStatus(RequestStatus.InProgress);
@@ -211,6 +209,51 @@ namespace RequestsService.Controllers
 
                 return Ok(requestDTO);
             } else
+            {
+                return NotFound();
+            }
+
+        }
+
+        [HttpPut("{id}/close")]
+        public async Task<IActionResult> CloseRequest(long id, [FromBody]RequestEndDTO requestEnd)
+        {
+            var request = this._serviceDbContext.Requests
+                .Include(x => x.Type)
+                .Include(x => x.Operator)
+                .ThenInclude(x => x.Employee)
+                .Include(x => x.User)
+                .ThenInclude(x => x.Employee)
+                .ThenInclude(x => x.Student)
+                .FirstOrDefault(x => x.Id == id);
+
+            var operatorId = this.GetCurrentUserId();
+            var thisUser = this._serviceDbContext.Users
+                .Include(x => x.Employee)
+                .ThenInclude(x => x.Operator)
+                .FirstOrDefault(x => x.Id == operatorId);
+
+            var thisOperator = thisUser.Employee.Operator;
+
+            if (thisOperator == null)
+            {
+                return BadRequest();
+            }
+
+            if (request != null)
+            {
+                request.ChangeStatus(RequestStatus.Closed);
+                request.Operator = thisOperator;
+                request.ResultFileId = requestEnd.ResultFileId;
+                request.OperatorComment = requestEnd.OperatorComment;
+                request.ProcessingEndDate = DateTime.Now;
+                await this._serviceDbContext.SaveChangesAsync();
+
+                RequestDTO requestDTO = RequestController.RemapReqEntToDTO(request);
+
+                return Ok(requestDTO);
+            }
+            else
             {
                 return NotFound();
             }
