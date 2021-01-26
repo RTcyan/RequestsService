@@ -156,5 +156,46 @@ namespace RequestsService.Controllers
 
             return Ok();
         }
+
+        /// <summary>
+        /// Регистрация нового оператора
+        /// </summary>
+        /// <param name="model">Новый оператор</param>
+        [HttpPost]
+        [Route("operator/signup")]
+        public async Task<IActionResult> SignUpOperator(SignUpOperatorInputDTO model)
+        {
+            var userOperator = new Operator
+            {
+                Department = _serviceDbContext.Departments.Find(model.DepartmentId)
+            };
+
+            var empoloyee = new Employee
+            {
+                FirstName = model.FirstName,
+                Surname = model.Surname,
+                Operator = userOperator
+            };
+
+            var user = new User
+            {
+                UserName = model.Login,
+                Email = model.Email,
+                Employee = empoloyee
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            await _userManager.AddToRoleAsync(user, SecurityConstants.OperatorRole);
+
+            _serviceDbContext.SaveChanges();
+
+            return Ok();
+        }
     }
 }

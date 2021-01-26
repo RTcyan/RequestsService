@@ -21,7 +21,14 @@ namespace RequestsService.Extensions
         {
             var userId = controllerBase.GetCurrentUserId();
 
-            var user = await serviceDbContext.Users.Include(x => x.Employee).FirstOrDefaultAsync<User>(user => user.Id == userId);
+            var user = await serviceDbContext.Users
+                .Include(x => x.Employee)
+                .ThenInclude(x => x.Student)
+                .ThenInclude(x => x.Faculty)
+                .Include(x => x.Employee)
+                .ThenInclude(x => x.Operator)
+                .ThenInclude(x => x.Department)
+                .FirstOrDefaultAsync<User>(user => user.Id == userId);
 
             return user;
         }

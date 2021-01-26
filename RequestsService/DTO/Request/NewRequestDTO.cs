@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace RequestsService.DTO.Request
 {
     /// <summary>
-    /// DTO модель нового поста
+    /// DTO модель нового запроса
     /// </summary>
     public class NewRequestDTO
     {

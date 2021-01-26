@@ -167,7 +167,7 @@ namespace RequestsService.Domain.DB
                     .HasColumnName("Name")
                     .IsRequired();
                 x.Property(y => y.Fields)
-                    .HasColumnName("Fields)")
+                    .HasColumnName("Fields")
                     .IsRequired();
                 x.HasOne(x => x.Department)
                     .WithOne()

@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using RequestsService.Domain.DB;
 using RequestsService.Domain.Model;
 using RequestsService.DTO.Request;
+using RequestsService.DTO.User;
 using RequestsService.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace RequestsService.Controllers
@@ -54,8 +56,85 @@ namespace RequestsService.Controllers
         [HttpGet("user/{id}")]
         public IActionResult GetRequestsByUserId(long id)
         {
-            var requests = this._serviceDbContext.Requests.Where(x => x.User.Id == id);
-            return Ok(requests);
+            var requests = this._serviceDbContext.Requests
+                .Include(x => x.Type)
+                .Include(x => x.Operator)
+                .ThenInclude(x => x.Employee)
+                .Include(x => x.User)
+                .ThenInclude(x => x.Employee)
+                .ThenInclude(x => x.Student)
+                .Where(x => x.User.Id == id);
+
+            List<RequestDTO> requestDTOs = new List<RequestDTO>();
+
+            if (requests != null)
+            {
+                foreach (var request in requests)
+                {
+                    RequestDTO requestDTO = RequestController.RemapReqEntToDTO(request);
+                    requestDTOs.Add(requestDTO);
+                }
+
+                return Ok(requestDTOs);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetRequestsById(long id)
+        {
+            var request = this._serviceDbContext.Requests
+                .Include(x => x.Type)
+                .Include(x => x.Operator)
+                .ThenInclude(x => x.Employee)
+                .Include(x => x.User)
+                .ThenInclude(x => x.Employee)
+                .ThenInclude(x => x.Student)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (request != null)
+            {
+                RequestDTO requestDTO = RequestController.RemapReqEntToDTO(request);
+                return Ok(requestDTO);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpGet("department/{id}")]
+        public IActionResult GetRequestsByDepartmentId(long id)
+        {
+            var requests = this._serviceDbContext.Requests
+                .Include(x => x.Type)
+                .ThenInclude(x => x.Department)
+                .Include(x => x.Operator)
+                .ThenInclude(x => x.Employee)
+                .Include(x => x.User)
+                .ThenInclude(x => x.Employee)
+                .ThenInclude(x => x.Student)
+                .Where(x => x.Type.Department.Id == id);
+
+            List<RequestDTO> requestDTOs = new List<RequestDTO>();
+
+            if (requests != null)
+            {
+                foreach (var request in requests)
+                {
+                    RequestDTO requestDTO = RequestController.RemapReqEntToDTO(request);
+                    requestDTOs.Add(requestDTO);
+                }
+
+                return Ok(requestDTOs);
+            } else
+            {
+                return NotFound();
+            }
+
         }
 
         [HttpGet("current")]
@@ -67,12 +146,135 @@ namespace RequestsService.Controllers
 
             var student = _serviceDbContext.Students.FirstOrDefault(x => x.Employee.Id == currentUser.Employee.Id);
 
-            var requests = _serviceDbContext.Requests
+            var requests = this._serviceDbContext.Requests
                 .Include(x => x.Type)
                 .Include(x => x.Operator)
+                .ThenInclude(x => x.Employee)
+                .Include(x => x.User)
+                .ThenInclude(x => x.Employee)
+                .ThenInclude(x => x.Student)
                 .Where(x => x.User.Id == currentUserId);
 
-            return Ok(requests);
+            List<RequestDTO> requestDTOs = new List<RequestDTO>();
+
+            if (requests != null)
+            {
+                foreach (var request in requests)
+                {
+                    RequestDTO requestDTO = RequestController.RemapReqEntToDTO(request);
+                    requestDTOs.Add(requestDTO);
+                }
+
+                return Ok(requestDTOs);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut("{id}/inProgress")]
+        public async Task<IActionResult> ChangeStatusInProgressForRequest(long id)
+        {
+            var request = this._serviceDbContext.Requests
+                .Include(x => x.Type)
+                .Include(x => x.Operator)
+                .ThenInclude(x => x.Employee)
+                .Include(x => x.User)
+                .ThenInclude(x => x.Employee)
+                .ThenInclude(x => x.Student)
+                .FirstOrDefault(x => x.Id == id);
+
+            var operatorId = this.GetCurrentUserId();
+            var thisUser = this._serviceDbContext.Users
+                .Include(x => x.Employee)
+                .ThenInclude(x => x.Operator)
+                .FirstOrDefault(x => x.Id == operatorId);
+
+            var thisOperator = thisUser.Employee.Operator;
+
+            if (thisOperator == null)
+            {
+                return BadRequest();
+            }
+
+
+
+            if (request != null)
+            {
+                request.ChangeStatus(RequestStatus.InProgress);
+                request.Operator = thisOperator;
+                request.ProcessingStartDate = DateTime.Now;
+                await this._serviceDbContext.SaveChangesAsync();
+
+                RequestDTO requestDTO = RequestController.RemapReqEntToDTO(request);
+
+                return Ok(requestDTO);
+            } else
+            {
+                return NotFound();
+            }
+
+        }
+
+        public static RequestDTO RemapReqEntToDTO(Request request)
+        {
+            OperatorDTO operatorDTO = null;
+            if (request.Operator != null)
+            {
+                EmployeeDTO operatorEmployeeDTO = new EmployeeDTO
+                {
+                    Id = request.Operator.Employee.Id,
+                    FirstName = request.Operator.Employee.FirstName,
+                    Surname = request.Operator.Employee.Surname
+                };
+
+                operatorDTO = new OperatorDTO
+                {
+                    Id = request.Operator.Id,
+                    Department = request.Operator.Department,
+                    Employee = operatorEmployeeDTO
+                };
+            }
+
+            StudentDTO studentDTO = null;
+            if (request.User != null)
+            {
+                EmployeeDTO studentEmployeeDTO = new EmployeeDTO
+                {
+                    Id = request.User.Employee.Id,
+                    FirstName = request.User.Employee.FirstName,
+                    Surname = request.User.Employee.Surname
+                };
+
+                studentDTO = new StudentDTO
+                {
+                    Employee = studentEmployeeDTO,
+                    Faculty = request.User.Employee.Student.Faculty,
+                    Grade = request.User.Employee.Student.Grade,
+                    NumberStudentCard = request.User.Employee.Student.NumberStudentCard,
+                    PhotoStudentCardId = request.User.Employee.Student.PhotoStudentCardId,
+                    StartEducation = request.User.Employee.Student.StartEducation,
+                };
+            }
+
+            RequestDTO requestDTO = new RequestDTO
+            {
+                Id = request.Id,
+                Operator = operatorDTO,
+                Created = request.Created,
+                Data = request.Data,
+                Student = studentDTO,
+                OperatorComment = request.OperatorComment,
+                ProcessingEndDate = request.ProcessingEndDate,
+                ProcessingStartDate = request.ProcessingStartDate,
+                RequestStatus = request.RequestStatus,
+                ResultFileId = request.ResultFileId,
+                Type = request.Type,
+                UserComment = request.UserComment
+            };
+
+            return requestDTO;
         }
     }
 }

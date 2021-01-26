@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RequestsService.Domain.Model.Common;
+using RequestsService.Domain.Model;
 
 namespace RequestsService.DTO.User
 {
     /// <summary>
     /// DTO модель регистрации пользователя
     /// </summary>
-    public class SignUpInputDTO: Entity
+    public class SignUpOperatorInputDTO
     {
         /// <summary>
         /// Login
@@ -37,28 +37,8 @@ namespace RequestsService.DTO.User
         public string Email { get; set; }
 
         /// <summary>
-        /// Начала обучения
+        /// Отделения оператора
         /// </summary>
-        public DateTime StartEducation { get; set; }
-
-        /// <summary>
-        /// Номер студенческого
-        /// </summary>
-        public string NumberStudentCard { get; set; }
-
-        /// <summary>
-        /// UUID фото студенческого
-        /// </summary>
-        public string PhotoStudentCardId { get; set; }
-
-        /// <summary>
-        /// Курс
-        /// </summary>
-        public int Grade { get; set; }
-
-        /// <summary>
-        /// Факультет
-        /// </summary>
-        public long FacultyID { get; set; }
+        public long DepartmentId { get; set; }
     }
 }
